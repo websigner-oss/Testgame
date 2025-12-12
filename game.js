@@ -2,7 +2,7 @@ const SAVE_KEY = "rcd_save_v1";
 const LEADER_KEY = "rcd_leader_v1";
 const SETTINGS_KEY = "rcd_settings_v1";
 
-const END_FLOOR = 25;
+const END_FLOOR = 35;
 
 const TILES = {
   WALL: 0,
@@ -340,7 +340,7 @@ function enemyPoolForFloor(floor) {
 }
 
 function scaleStat(base, floor) {
-  return Math.round(base * (1 + Math.max(0, floor - 1) * 0.08));
+  return Math.round(base * (1 + Math.max(0, floor - 1) * 0.06));
 }
 
 function dungeonIndex(d, x, y) {
@@ -744,6 +744,7 @@ class RogueGame {
 
   _setupUi() {
     const btnHelp = document.getElementById("btnHelp");
+    const btnPreview = document.getElementById("btnPreview");
     const btnPause = document.getElementById("btnPause");
     const btnSound = document.getElementById("btnSound");
     const btnMusic = document.getElementById("btnMusic");
@@ -759,6 +760,13 @@ class RogueGame {
       this.sound.ensure();
       this.showHelp();
     });
+
+    if (btnPreview) {
+      btnPreview.addEventListener("click", () => {
+        const url = `preview.html`;
+        window.open(url, "_blank", "noopener");
+      });
+    }
 
     btnPause.addEventListener("click", () => {
       this.sound.ensure();
