@@ -671,6 +671,19 @@ class RogueGame {
     ctx.font = "16px ui-monospace, Menlo, Consolas, monospace";
     ctx.textBaseline = "top";
 
+    const stairsIdx = dungeonIndex(d, d.stairs.x, d.stairs.y);
+    if (d.seen[stairsIdx]) {
+      const tile = d.tiles[stairsIdx];
+      const isVis = d.visible[stairsIdx] === 1;
+      if (tile === TILES.STAIRS) {
+        ctx.fillStyle = isVis ? "#6bdcff" : "#2a6a7a";
+        ctx.fillText(">", d.stairs.x * ts + 3, d.stairs.y * ts + 1);
+      } else if (tile === TILES.EXIT) {
+        ctx.fillStyle = isVis ? "#ff6bdc" : "#7a2a73";
+        ctx.fillText("E", d.stairs.x * ts + 3, d.stairs.y * ts + 1);
+      }
+    }
+
     for (const it of this.items) {
       if (!d.visible[dungeonIndex(d, it.x, it.y)]) continue;
       const px = it.x * ts + 3;
