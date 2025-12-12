@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Rogue Canvas Dungeon</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="title">Rogue Canvas Dungeon</div>
+      <div class="top-actions">
+        <button id="btnHelp" type="button">Help</button>
+        <button id="btnPreview" type="button">Preview</button>
+        <button id="btnSound" type="button">Sound: On</button>
+        <button id="btnMusic" type="button">Music: On</button>
+        <button id="btnPause" type="button">Menu</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="gameWrap">
+        <canvas id="game" width="640" height="400" aria-label="Game canvas"></canvas>
+
+        <div id="overlay" role="dialog" aria-modal="true">
+          <div class="modal" id="modal">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <div id="touchControls">
+          <div class="pad">
+            <div></div>
+            <button id="tUp" type="button">▲</button>
+            <div></div>
+            <button id="tLeft" type="button">◀</button>
+            <button id="tWait" type="button">•</button>
+            <button id="tRight" type="button">▶</button>
+            <div></div>
+            <button id="tDown" type="button">▼</button>
+            <div></div>
+          </div>
+          <div class="actions">
+            <button id="tPotion" type="button">Potion</button>
+            <button id="tSkill" type="button">Skill</button>
+            <button id="tStairs" type="button">Descend</button>
+            <button id="tSave" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <aside id="sidePanel">
+        <section class="panelBlock">
+          <h3>Status</h3>
+          <div id="statsGrid">
+            <div class="kv"><span class="k">HP</span><span class="v" id="uiHp">-</span></div>
+            <div class="kv"><span class="k">Floor</span><span class="v" id="uiFloor">-</span></div>
+            <div class="kv"><span class="k">Level</span><span class="v" id="uiLevel">-</span></div>
+            <div class="kv"><span class="k">XP</span><span class="v" id="uiXp">-</span></div>
+            <div class="kv"><span class="k">ATK</span><span class="v" id="uiAtk">-</span></div>
+            <div class="kv"><span class="k">DEF</span><span class="v" id="uiDef">-</span></div>
+            <div class="kv"><span class="k">Gold</span><span class="v" id="uiGold">-</span></div>
+            <div class="kv"><span class="k">Potions</span><span class="v" id="uiPotions">-</span></div>
+            <div class="kv"><span class="k">Skill</span><span class="v" id="uiSkill">-</span></div>
+            <div class="kv"><span class="k">Score</span><span class="v" id="uiScore">-</span></div>
+          </div>
+        </section>
+
+        <section class="panelBlock">
+          <h3>Log</h3>
+          <div id="log" aria-live="polite"></div>
+        </section>
+
+        <section class="panelBlock">
+          <h3>Quick tips</h3>
+          <div style="color:var(--muted); font-size:13px; line-height:1.35">
+            Explore the dungeon, fight, collect gold, and descend deeper.
+            The game is turn-based: enemies move after you.
+            <br/><br/>
+            <b>Keys:</b> WASD/Arrows move, Space wait, P potion, F skill, Enter stairs.
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>
