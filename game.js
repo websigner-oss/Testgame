@@ -549,6 +549,15 @@ class RogueGame {
     this.mode = "MENU";
     this.settings = loadSettings();
 
+    this.params = new URLSearchParams(window.location.search);
+    this.demoMode = this.params.get("demo") === "1";
+    this.ephemeralSettings = false;
+    if (this.params.get("mute") === "1") {
+      this.settings.soundOn = false;
+      this.settings.musicOn = false;
+      this.ephemeralSettings = true;
+    }
+
     this.sound = new SoundManager();
     this.sound.loadSettings(this.settings);
 
@@ -581,7 +590,11 @@ class RogueGame {
     this._setupUi();
     this._setupInputs();
 
-    this.showMainMenu();
+    this.demo = { actionAcc: 0, overlayAcc: 0, gameOverAcc: 0 };
+
+    const autoStart = this.demoMode || this.params.get("autostart") === "1";
+    if (autoStart) this.newGame();
+    else this.showMainMenu();
   }
 
   start() {
@@ -614,6 +627,8 @@ class RogueGame {
     if (this.mode === "PLAY" && this.player) {
       this._renderStats();
     }
+
+    if (this.demoMode) this._demoUpdate(dt);
   }
 
   draw() {
@@ -757,7 +772,7 @@ class RogueGame {
       this.sound.setSound(this.settings.soundOn);
       if (!this.settings.soundOn) this.sound.stopMusic();
       if (this.settings.soundOn && this.settings.musicOn) this.sound.startMusic();
-      saveSettings(this.settings);
+      if (!this.ephemeralSettings) saveSettings(this.settings);
       updateToggles();
     });
 
@@ -765,7 +780,7 @@ class RogueGame {
       this.sound.ensure();
       this.settings.musicOn = !this.settings.musicOn;
       this.sound.setMusic(this.settings.musicOn);
-      saveSettings(this.settings);
+      if (!this.ephemeralSettings) saveSettings(this.settings);
       updateToggles();
     });
 
@@ -2078,6 +2093,164 @@ class RogueGame {
     });
   }
 
+  _demoUpdate(dt) {
+    if (!this.demoMode) return;
+
+    if (this.mode === "GAMEOVER") {
+      this.demo.gameOverAcc += dt;
+      if (this.demo.gameOverAcc > 1200) {
+        this.demo.gameOverAcc = 0;
+        this.showMainMenu();
+      }
+      return;
+    }
+
+    if (this.mode === "MENU") {
+      this.newGame();
+      return;
+    }
+
+    const overlayShown = UI.overlay.classList.contains("show");
+    if (overlayShown) {
+      this.demo.overlayAcc += dt;
+      if (this.demo.overlayAcc < 350) return;
+      this.demo.overlayAcc = 0;
+      this._demoHandleOverlay();
+      return;
+    }
+
+    this.demo.overlayAcc = 0;
+
+    if (this.mode !== "PLAY" || !this.player || !this.dungeon) return;
+
+    this.demo.actionAcc += dt;
+    if (this.demo.actionAcc < 170) return;
+    this.demo.actionAcc = 0;
+
+    const p = this.player;
+
+    if (p.hp <= Math.floor(p.maxHp * 0.45) && p.potions > 0) {
+      this.handleAction({ kind: "potion" });
+      return;
+    }
+
+    if (p.skillUnlocked && p.skillCooldown === 0) {
+      const hasAdjacent = this.enemies.some(
+        (e) => e.hp > 0 && distManhattan(e.x, e.y, p.x, p.y) === 1,
+      );
+      if (hasAdjacent) {
+        this.handleAction({ kind: "skill" });
+        return;
+      }
+    }
+
+    const target = this._demoPickTarget();
+    if (!target) {
+      this.handleAction({ kind: "wait" });
+      return;
+    }
+
+    if (target.kind === "stairs") {
+      const tile = this.dungeon.tiles[dungeonIndex(this.dungeon, p.x, p.y)];
+      if (tile === TILES.STAIRS || tile === TILES.EXIT) {
+        this.handleAction({ kind: "stairs" });
+        return;
+      }
+    }
+
+    if (target.kind === "enemy" && target.entity) {
+      const e = target.entity;
+      const md = distManhattan(e.x, e.y, p.x, p.y);
+      if (md === 1) {
+        this.handleAction({ kind: "move", dx: e.x - p.x, dy: e.y - p.y });
+        return;
+      }
+    }
+
+    this._demoMoveToward(target.x, target.y);
+  }
+
+  _demoHandleOverlay() {
+    if (this.mode === "LEVELUP" && this.pendingLevelUp && Array.isArray(this.pendingLevelUp.keys)) {
+      const pool = this._levelUpPerkPool();
+      const byKey = new Map(pool.map((p) => [p.key, p]));
+      const keys = this.pendingLevelUp.keys;
+      const chosenKey = keys.length ? keys[this.rng.int(0, keys.length - 1)] : null;
+      const perk = chosenKey ? byKey.get(chosenKey) : null;
+      if (!perk) return;
+
+      perk.apply();
+      this.pendingLevelUp = null;
+      this.hideOverlay();
+      this.mode = "PLAY";
+      this.saveGame();
+      return;
+    }
+
+    if (this.mode === "SHOP" && this.pendingShop && Array.isArray(this.pendingShop.offers)) {
+      const p = this.player;
+      const offers = this.pendingShop.offers;
+
+      let idx = -1;
+      for (let i = 0; i < offers.length; i++) {
+        const o = offers[i];
+        if (!o || o.disabled) continue;
+        if (o.kind === "reroll") continue;
+        if (o.kind === "heal" && p.hp >= p.maxHp) continue;
+        if (p.gold >= o.cost) {
+          idx = i;
+          break;
+        }
+      }
+
+      if (idx >= 0) this.buyShopOffer(idx);
+      else this.leaveShop();
+    }
+  }
+
+  _demoPickTarget() {
+    const d = this.dungeon;
+    const p = this.player;
+
+    const visibleEnemies = this.enemies
+      .filter((e) => e.hp > 0 && d.visible[dungeonIndex(d, e.x, e.y)] === 1)
+      .sort((a, b) => distManhattan(a.x, a.y, p.x, p.y) - distManhattan(b.x, b.y, p.x, p.y));
+
+    if (visibleEnemies.length) {
+      const e = visibleEnemies[0];
+      return { kind: "enemy", x: e.x, y: e.y, entity: e };
+    }
+
+    const visibleItems = this.items
+      .filter((it) => d.visible[dungeonIndex(d, it.x, it.y)] === 1)
+      .sort((a, b) => distManhattan(a.x, a.y, p.x, p.y) - distManhattan(b.x, b.y, p.x, p.y));
+
+    const potion = visibleItems.find((it) => it.kind === "potion");
+    if (potion) return { kind: "item", x: potion.x, y: potion.y, entity: potion };
+
+    const gold = visibleItems.find((it) => it.kind === "gold");
+    if (gold) return { kind: "item", x: gold.x, y: gold.y, entity: gold };
+
+    return { kind: "stairs", x: d.stairs.x, y: d.stairs.y };
+  }
+
+  _demoMoveToward(tx, ty) {
+    const p = this.player;
+    if (p.x === tx && p.y === ty) {
+      this.handleAction({ kind: "wait" });
+      return;
+    }
+
+    const dist = this._computeDistanceMap(tx, ty);
+    const step = this._nextStepTowards(p.x, p.y, dist);
+    if (!step) {
+      this.handleAction({ kind: "wait" });
+      return;
+    }
+
+    this.handleAction({ kind: "move", dx: step[0] - p.x, dy: step[1] - p.y });
+  }
+
   saveGame() {
     if (!this.player || !this.dungeon) return;
 
@@ -2190,4 +2363,5 @@ function escapeHtml(str) {
 }
 
 const game = new RogueGame();
+window.__rcdGame = game;
 game.start();

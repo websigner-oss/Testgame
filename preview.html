@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rogue Canvas Dungeon — Preview/Test</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    main{ width:min(1200px,100%); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
+    .previewActions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .previewActions button, .previewActions a{ padding:10px 12px; border-radius:12px; border:1px solid #2b2f48; background:#141a34; color:var(--text); text-decoration:none; display:inline-flex; align-items:center; }
+    .previewActions a{ background:#12314b; border-color:#2a7faa; }
+    iframe{ width:100%; height:min(860px, 78vh); border:1px solid #23263a; border-radius:14px; background:#0b0d16; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="title">Rogue Canvas Dungeon — Preview/Test</div>
+      <div class="top-actions">
+        <a href="index.html" style="padding:8px 10px; border:1px solid #2b2f48; border-radius:10px; text-decoration:none">Open full game</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="panelBlock">
+        <h3>Quick preview</h3>
+        <div style="color:var(--muted); font-size:13px; line-height:1.45">
+          This page embeds a <b>demo/autoplay</b> run (muted) to quickly smoke-test gameplay, level-ups, the shop between floors, and save/load.
+          <br/><br/>
+          Want manual testing? Use <b>Open full game</b> (top-right).
+        </div>
+        <div class="previewActions" style="margin-top:10px">
+          <button id="btnRestart" type="button">Restart demo</button>
+          <button id="btnClearSave" type="button">Clear save</button>
+          <button id="btnClearLeaders" type="button">Clear leaderboard</button>
+          <a href="index.html?demo=1" target="_blank" rel="noreferrer">Open demo in new tab</a>
+        </div>
+      </section>
+
+      <iframe id="frame" title="Game preview" src="index.html?demo=1&mute=1"></iframe>
+
+      <section class="panelBlock">
+        <h3>Suggested test checklist</h3>
+        <div style="color:var(--muted); font-size:13px; line-height:1.45">
+          <div>1) Start a new run, move/attack, pick up gold/potions.</div>
+          <div>2) Gain XP and confirm the <b>Level Up</b> modal appears and applies upgrades.</div>
+          <div>3) Stand on stairs (>) and press Enter to open the <b>Shop</b>, then continue to the next floor.</div>
+          <div>4) Confirm auto-save: refresh and press <b>Continue</b>.</div>
+          <div>5) Die (or win) and submit a score to the local leaderboard.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const SAVE_KEY = "rcd_save_v1";
+    const LEADER_KEY = "rcd_leader_v1";
+
+    const frame = document.getElementById('frame');
+
+    const reloadDemo = () => {
+      frame.src = `index.html?demo=1&mute=1&ts=${Date.now()}`;
+    };
+
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      localStorage.removeItem(SAVE_KEY);
+      reloadDemo();
+    });
+
+    document.getElementById('btnClearSave').addEventListener('click', () => {
+      localStorage.removeItem(SAVE_KEY);
+      reloadDemo();
+    });
+
+    document.getElementById('btnClearLeaders').addEventListener('click', () => {
+      localStorage.removeItem(LEADER_KEY);
+      reloadDemo();
+    });
+  </script>
+</body>
+</html>

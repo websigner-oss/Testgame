@@ -27,3 +27,13 @@ Mobile: use the on-screen D-pad/buttons.
 ## Save / Load
 
 The game auto-saves to `localStorage`. Use **Continue** from the menu to resume.
+
+## Preview / Test
+
+Open the built-in preview page (autoplay demo, muted):
+
+- http://localhost:8000/preview.html
+
+Or run the demo directly:
+
+- http://localhost:8000/index.html?demo=1&mute=1
