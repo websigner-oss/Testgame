@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق استعادة الصور - Image Restoration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ تطبيق استعادة الصور</h1>
+            <p class="subtitle">Image Restoration App</p>
+            <p class="description">استعادة الصور التالفة والمتشققة بالكامل في المتصفح</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div class="upload-section card">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <h3>ارفع صورتك هنا</h3>
+                    <p>اسحب وأفلت الصورة أو انقر للاختيار</p>
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                        اختر صورة
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image Preview Section -->
+            <div class="preview-section">
+                <div class="image-container card">
+                    <h3>الصورة الأصلية</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="originalCanvas"></canvas>
+                        <div class="placeholder" id="originalPlaceholder">
+                            <span>لا توجد صورة</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-container card">
+                    <h3>الصورة المعالجة</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="processedCanvas"></canvas>
+                        <div class="placeholder" id="processedPlaceholder">
+                            <span>في انتظار المعالجة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section card">
+                <h3>أدوات المعالجة</h3>
+                
+                <div class="controls-grid">
+                    <!-- Main Processing Buttons -->
+                    <div class="control-group">
+                        <h4>عمليات المعالجة الرئيسية</h4>
+                        <div class="button-group">
+                            <button class="btn btn-success" id="restoreBtn" disabled>
+                                🔧 إصلاح الصورة
+                            </button>
+                            <button class="btn btn-success" id="denoiseBtn" disabled>
+                                🧹 إزالة الضوضاء
+                            </button>
+                            <button class="btn btn-success" id="enhanceBtn" disabled>
+                                ✨ تحسين الجودة
+                            </button>
+                            <button class="btn btn-success" id="inpaintBtn" disabled>
+                                🎨 إصلاح التشققات
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Denoising Parameters -->
+                    <div class="control-group">
+                        <h4>إعدادات إزالة الضوضاء</h4>
+                        <div class="slider-control">
+                            <label for="denoiseStrength">قوة إزالة الضوضاء: <span id="denoiseValue">7</span></label>
+                            <input type="range" id="denoiseStrength" min="3" max="15" value="7" step="2">
+                        </div>
+                        <div class="slider-control">
+                            <label for="denoiseColor">معامل اللون: <span id="denoiseColorValue">7</span></label>
+                            <input type="range" id="denoiseColor" min="3" max="15" value="7" step="2">
+                        </div>
+                    </div>
+
+                    <!-- Enhancement Parameters -->
+                    <div class="control-group">
+                        <h4>إعدادات التحسين</h4>
+                        <div class="slider-control">
+                            <label for="sharpenAmount">حدة الصورة: <span id="sharpenValue">1.0</span></label>
+                            <input type="range" id="sharpenAmount" min="0" max="2" value="1.0" step="0.1">
+                        </div>
+                        <div class="slider-control">
+                            <label for="contrastAmount">التباين: <span id="contrastValue">1.0</span></label>
+                            <input type="range" id="contrastAmount" min="0.5" max="2" value="1.0" step="0.1">
+                        </div>
+                        <div class="slider-control">
+                            <label for="brightnessAmount">السطوع: <span id="brightnessValue">0</span></label>
+                            <input type="range" id="brightnessAmount" min="-50" max="50" value="0" step="5">
+                        </div>
+                    </div>
+
+                    <!-- Crack Repair Parameters -->
+                    <div class="control-group">
+                        <h4>إعدادات إصلاح التشققات</h4>
+                        <div class="slider-control">
+                            <label for="morphSize">حجم الكشف: <span id="morphSizeValue">3</span></label>
+                            <input type="range" id="morphSize" min="1" max="7" value="3" step="2">
+                        </div>
+                        <div class="slider-control">
+                            <label for="inpaintRadius">نطاق الإصلاح: <span id="inpaintRadiusValue">3</span></label>
+                            <input type="range" id="inpaintRadius" min="1" max="10" value="3" step="1">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="control-group">
+                        <h4>الإجراءات</h4>
+                        <div class="button-group">
+                            <button class="btn btn-primary" id="resetBtn" disabled>
+                                🔄 إعادة تعيين
+                            </button>
+                            <button class="btn btn-warning" id="downloadBtn" disabled>
+                                💾 تحميل الصورة
+                            </button>
+                            <button class="btn btn-secondary" id="saveSettingsBtn">
+                                📋 حفظ الإعدادات
+                            </button>
+                            <button class="btn btn-secondary" id="loadSettingsBtn">
+                                📂 تحميل الإعدادات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section card" id="progressSection" style="display: none;">
+                <div class="progress-content">
+                    <div class="spinner"></div>
+                    <p id="progressText">جاري المعالجة...</p>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section card">
+                <h3>معلومات الاستخدام</h3>
+                <ul>
+                    <li><strong>إصلاح الصورة:</strong> يطبق معالجة شاملة تشمل إزالة الضوضاء والتحسين</li>
+                    <li><strong>إزالة الضوضاء:</strong> يزيل التشويش والحبيبات من الصورة</li>
+                    <li><strong>تحسين الجودة:</strong> يحسن الحدة والتباين والسطوع</li>
+                    <li><strong>إصلاح التشققات:</strong> يستخدم تقنية Inpainting لإصلاح الخطوط والشقوق</li>
+                    <li><strong>معالجة محلية:</strong> جميع العمليات تتم في متصفحك بدون إرسال البيانات</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>تم التطوير باستخدام OpenCV.js | جميع الحقوق محفوظة © 2024</p>
+            <p id="opencvStatus">جاري تحميل OpenCV.js...</p>
+        </footer>
+    </div>
+
+    <!-- Load OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady()"></script>
+    <script src="app.js"></script>
+</body>
+</html>
