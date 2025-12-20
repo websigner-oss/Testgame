@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار بسيط - تحميل الصور</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .upload-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #e8f4f8;
+            color: #333;
+        }
+        canvas {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            margin: 10px 0;
+            display: block;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ اختبار تحميل الصور</h1>
+        
+        <div class="status" id="status">
+            جاهز - اضغط على الزر لاختيار صورة
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*" class="hidden">
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            📤 اختر صورة
+        </button>
+        
+        <div id="imageContainer" class="hidden">
+            <h3>الصورة المحملة:</h3>
+            <canvas id="canvas"></canvas>
+            <div id="imageInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const imageContainer = document.getElementById('imageContainer');
+        const imageInfo = document.getElementById('imageInfo');
+
+        function updateStatus(message, color = '#e8f4f8') {
+            status.textContent = message;
+            status.style.background = color;
+            console.log('Status:', message);
+        }
+
+        fileInput.addEventListener('change', function(e) {
+            console.log('File input changed');
+            const file = e.target.files[0];
+            
+            if (!file) {
+                updateStatus('لم يتم اختيار ملف', '#ffebee');
+                console.log('No file selected');
+                return;
+            }
+
+            console.log('File selected:', file.name, file.type, file.size);
+            updateStatus('جاري تحميل: ' + file.name, '#fff3cd');
+
+            if (!file.type.startsWith('image/')) {
+                updateStatus('الملف ليس صورة! اختر ملف صورة', '#ffebee');
+                console.error('Not an image file:', file.type);
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onerror = function(error) {
+                console.error('FileReader error:', error);
+                updateStatus('خطأ في قراءة الملف', '#ffebee');
+            };
+
+            reader.onload = function(event) {
+                console.log('File loaded, size:', event.target.result.length);
+                updateStatus('تم قراءة الملف، جاري تحميل الصورة...', '#fff3cd');
+
+                const img = new Image();
+
+                img.onerror = function(error) {
+                    console.error('Image load error:', error);
+                    updateStatus('خطأ في تحميل الصورة', '#ffebee');
+                };
+
+                img.onload = function() {
+                    console.log('Image loaded! Size:', img.width, 'x', img.height);
+                    
+                    // Set canvas size
+                    const maxWidth = 500;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        const ratio = maxWidth / width;
+                        width = maxWidth;
+                        height = height * ratio;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Draw image
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Show container
+                    imageContainer.classList.remove('hidden');
+
+                    // Update info
+                    imageInfo.innerHTML = `
+                        <p><strong>اسم الملف:</strong> ${file.name}</p>
+                        <p><strong>نوع الملف:</strong> ${file.type}</p>
+                        <p><strong>حجم الملف:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
+                        <p><strong>أبعاد الصورة:</strong> ${img.width} x ${img.height}</p>
+                        <p><strong>أبعاد العرض:</strong> ${Math.round(width)} x ${Math.round(height)}</p>
+                    `;
+
+                    updateStatus('✓ تم تحميل الصورة بنجاح!', '#d4edda');
+                    console.log('Success! Image displayed on canvas');
+                };
+
+                img.src = event.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        // Test if JavaScript is working
+        console.log('JavaScript is working!');
+        console.log('Canvas context:', ctx ? 'Available' : 'Not available');
+        updateStatus('جاهز - اضغط على الزر لاختيار صورة', '#d4edda');
+    </script>
+</body>
+</html>

@@ -50,6 +50,20 @@ A complete web application for restoring damaged and cracked images while preser
 - JavaScript مفعل - JavaScript enabled
 - اتصال بالإنترنت (لتحميل OpenCV.js فقط) - Internet connection (for OpenCV.js loading only)
 
+## 🚨 مهم: إذا لم يعمل التطبيق
+
+إذا واجهت مشاكل في تحميل الصور أو المعالجة:
+
+1. **جرب ملف الاختبار البسيط أولاً**: افتح `test-simple.html` للتأكد من أن المتصفح يدعم تحميل الصور
+2. **استخدم Web Server**: بدلاً من فتح الملف مباشرة، استخدم web server محلي
+3. **راجع دليل حل المشاكل**: افتح `TROUBLESHOOTING.md` للحلول التفصيلية
+4. **ميزة جديدة**: "تحسين الجودة" يعمل الآن بدون OpenCV.js!
+
+### 📱 للاستخدام على الموبايل:
+- يُنصح باستخدام web server أو رفع الملفات على GitHub Pages
+- OpenCV.js قد يستغرق 10-30 ثانية للتحميل على اتصال 3G/4G
+- جميع الميزات تعمل بعد تحميل OpenCV.js
+
 ## 🎯 كيفية الاستخدام - How to Use
 
 1. **فتح التطبيق** - Open the Application
